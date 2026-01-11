@@ -1,0 +1,105 @@
+<Window x:Class="yTodo.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:yTodo.Helpers"
+        Title="yTodo Settings" Height="500" Width="350"
+        Background="#2D2D2D" Foreground="White"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        ShowInTaskbar="False">
+    
+    <Window.Resources>
+        <helpers:ColorConverter x:Key="ColorConverter" />
+        <Style x:Key="FlatButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#33FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ColorSwatch" TargetType="Button">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="16" BorderThickness="1" BorderBrush="#33FFFFFF">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Border Padding="25">
+                <StackPanel>
+                    <TextBlock Text="Settings" FontWeight="Bold" FontSize="18" Margin="0,0,0,20"/>
+                    
+                    <CheckBox Content="RTL Mode" IsChecked="{Binding IsRtl}" Foreground="White" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Font Family" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding AvailableFonts}" SelectedItem="{Binding SelectedFont}" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Font Size" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
+                    <Slider Minimum="12" Maximum="32" Value="{Binding SelectedFontSize}" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Line Spacing" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
+                    <Slider Minimum="0" Maximum="40" Value="{Binding SelectedLineSpacing}" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Theme Color" FontSize="11" Opacity="0.7" Margin="0,0,0,8"/>
+                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <Button Background="#1E1E1E" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Default Dark"/>
+                        <Button Background="#121212" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Material Black"/>
+                        <Button Background="#282A36" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Dracula"/>
+                        <Button Background="#2E3440" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Nord"/>
+                        <Button Background="#0D1117" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="GitHub Dark"/>
+                        <Button Background="#23253B" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Midnight"/>
+                        <Button Background="#3B2323" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Warm"/>
+                        <Button Background="#233B32" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Forest"/>
+                        <Button Background="#42253B" Style="{StaticResource ColorSwatch}" Click="OnColorSwatchClicked" ToolTip="Velvet"/>
+                        
+                        <Button Style="{StaticResource ColorSwatch}" Background="#22FFFFFF" Click="OnPickColorClicked" ToolTip="Custom Color...">
+                            <TextBlock Text="+" FontSize="18" FontWeight="Light" Margin="0,-2,0,0" Foreground="#AAFFFFFF"/>
+                        </Button>
+                    </WrapPanel>
+                    
+                    <TextBox Text="{Binding SelectedBackgroundColor, UpdateSourceTrigger=PropertyChanged}" 
+                             Background="#1AFFFFFF" Foreground="#88FFFFFF" BorderThickness="1" BorderBrush="#33FFFFFF" 
+                             Padding="5" Margin="0,0,0,20" FontSize="11"/>
+
+                    <TextBlock Text="Markdown Tips:" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,8" Foreground="#88FFFFFF"/>
+                    <TextBlock Text="• '## ' → Header (Big &amp; Bold)" FontSize="11" Foreground="#44FFFFFF" Margin="5,0,0,4"/>
+                    <TextBlock Text="• '- ' or any text → Task (Checklist)" FontSize="11" Foreground="#44FFFFFF" Margin="5,0,0,20"/>
+
+                    <Button Content="Export Data" Click="OnExportClicked" Height="28" Width="100" 
+                            HorizontalAlignment="Left" Style="{StaticResource FlatButton}" 
+                            Background="#1AFFFFFF" Foreground="#88FFFFFF" FontSize="10" FontWeight="Normal"/>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</Window>

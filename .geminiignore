@@ -1,0 +1,18 @@
+# Ignore build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# Ignore assets
+Assets/
+*.ico
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Ignore git metadata
+.git/

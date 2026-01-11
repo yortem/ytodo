@@ -1,0 +1,2 @@
+[11/01/2026 19:24:50] RegisterHotKey (Win+Alt+T): False, Error Code: 1409
+[11/01/2026 19:27:48] RegisterHotKey (Win+Alt+T): False, Error Code: 1409

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "yTodo (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "yTodo (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
