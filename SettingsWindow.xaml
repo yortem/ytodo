@@ -58,6 +58,10 @@
             <Border Padding="25">
                 <StackPanel>
                     <TextBlock Text="Settings" FontWeight="Bold" FontSize="18" Margin="0,0,0,20"/>
+
+                    <TextBlock Text="Custom Title" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding AppTitle, UpdateSourceTrigger=PropertyChanged}" 
+                             Background="#1AFFFFFF" Foreground="White" BorderThickness="1" BorderBrush="#33FFFFFF" Padding="5" Margin="0,0,0,15"/>
                     
                     <CheckBox Content="RTL Mode" IsChecked="{Binding IsRtl}" Foreground="White" Margin="0,0,0,15"/>
                     

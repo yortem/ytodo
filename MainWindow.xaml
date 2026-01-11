@@ -7,7 +7,7 @@
         xmlns:helpers="clr-namespace:yTodo.Helpers"
         xmlns:vm="clr-namespace:yTodo.ViewModels"
         mc:Ignorable="d"
-        Title="yTodo" Height="800" Width="450"
+        Title="{Binding AppTitle}" Height="800" Width="450"
         Background="{Binding SelectedBackgroundColor, Converter={StaticResource ColorConverter}}"
         Foreground="White"
         WindowStartupLocation="CenterScreen"
@@ -18,7 +18,7 @@
         <!-- Converters moved to App.xaml -->
 
         <DataTemplate x:Key="EntryTemplate" DataType="{x:Type vm:EntryViewModel}">
-            <Border Background="Transparent" x:Name="ItemBorder" CornerRadius="4">
+            <Border Background="Transparent" x:Name="ItemBorder" CornerRadius="0">
                 <Border.Padding>
                     <MultiBinding Converter="{StaticResource ThicknessConverter}">
                         <Binding Source="20" />
@@ -32,7 +32,7 @@
                         <ColumnDefinition Width="40" />
                     </Grid.ColumnDefinitions>
 
-                    <CheckBox Grid.Column="0" IsChecked="{Binding IsDone}" VerticalAlignment="Top" Margin="5,4,15,0">
+                    <CheckBox Grid.Column="0" IsChecked="{Binding IsDone}" VerticalAlignment="Top" Margin="0,4,15,0">
                         <CheckBox.Visibility>
                             <Binding Path="IsTask">
                                 <Binding.Converter>
@@ -85,27 +85,45 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <Button Grid.Column="2" Content="✕" Click="OnDeleteClicked" 
-                            Background="Transparent" Foreground="#22FFFFFF" BorderThickness="0"
-                            Width="24" Height="24" HorizontalAlignment="Right" Cursor="Hand"
-                            Visibility="Hidden" x:Name="DeleteBtn" Style="{StaticResource FlatButton}"/>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="✕" Click="OnDeleteClicked" 
+                                Background="Transparent" Foreground="#22FFFFFF" BorderThickness="0"
+                                Width="24" Height="24" Cursor="Hand"
+                                Visibility="Hidden" x:Name="DeleteBtn" Style="{StaticResource FlatButton}"/>
+                    </StackPanel>
                 </Grid>
             </Border>
             <DataTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="ItemBorder" Property="Background" Value="#11FFFFFF" />
+                    <Setter TargetName="ItemBorder" Property="Background" Value="#08FFFFFF" />
                 </Trigger>
                 <DataTrigger Binding="{Binding IsDone}" Value="True">
                     <Setter TargetName="DeleteBtn" Property="Visibility" Value="Visible" />
                     <Setter TargetName="DeleteBtn" Property="Foreground" Value="#88FFFFFF" />
                 </DataTrigger>
+                
+                <!-- Placeholder Styling -->
+                <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                    <Setter TargetName="ItemBorder" Property="Opacity" Value="0.5" />
+                    <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                
+                <!-- Header Specific Styling -->
+                <DataTrigger Binding="{Binding IsHeader}" Value="True">
+                    <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
+                    
+                    <Setter TargetName="ItemBorder" Property="Margin" Value="0,15,0,5" />
+                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#11FFFFFF" />
+                    <Setter TargetName="ItemBorder" Property="Padding" Value="20,5,20,10" />
+                </DataTrigger>
+
                 <!-- Highlight when focused -->
                 <DataTrigger Binding="{Binding IsFocused, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                    <Setter TargetName="ItemBorder" Property="Background" Value="#15FFFFFF" />
+                    <Setter TargetName="ItemBorder" Property="Background" Value="#0AFFFFFF" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
-
     </Window.Resources>
 
     <Grid>
@@ -114,10 +132,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Padding="25,20">
+        <Border Padding="25,20,25,10">
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsHitTestVisible="False">
-                    <TextBlock Text="yTodo" FontSize="14" Opacity="0.4" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding AppTitle}" FontSize="14" Opacity="0.4" FontWeight="Bold"/>
                     <TextBlock Text="{Binding StatusMessage}" FontSize="11" Opacity="0.3" Margin="10,2,0,0" VerticalAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

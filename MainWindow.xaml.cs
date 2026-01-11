@@ -50,7 +50,16 @@ namespace yTodo
                     try
                     {
                         await ViewModel.LoadAsync();
+                        ViewModel.PropertyChanged += (vs, ve) =>
+                        {
+                            if (ve.PropertyName == nameof(MainViewModel.AppTitle) && _notifyIcon != null)
+                            {
+                                _notifyIcon.Text = ViewModel.AppTitle;
+                            }
+                        };
                         
+                        if (_notifyIcon != null) _notifyIcon.Text = ViewModel.AppTitle;
+
                         // Restore Window Position and Size
                         if (ViewModel.Settings != null)
                         {
@@ -144,10 +153,19 @@ namespace yTodo
 
             if (e.Key == Key.Enter)
             {
-                string prefix = entry.IsTask ? "- " : "";
-                var newEntry = ViewModel.AddEntry(index, prefix);
-                e.Handled = true;
-                FocusEntry(newEntry);
+                // If next item is placeholder, focus it
+                if (index < ViewModel.Entries.Count - 1 && ViewModel.Entries[index + 1].IsPlaceholder)
+                {
+                    e.Handled = true;
+                    FocusEntry(ViewModel.Entries[index + 1]);
+                }
+                else
+                {
+                    string prefix = entry.IsTask ? "- " : "";
+                    var newEntry = ViewModel.AddEntry(index, prefix);
+                    e.Handled = true;
+                    FocusEntry(newEntry);
+                }
             }
             else if (e.Key == Key.Back && string.IsNullOrEmpty(textBox.Text))
             {
@@ -177,6 +195,18 @@ namespace yTodo
                 if (index < ViewModel.Entries.Count - 1)
                 {
                     FocusEntry(ViewModel.Entries[index + 1]);
+                    e.Handled = true;
+                }
+            }
+            else if (e.Key == Key.Tab)
+            {
+                bool isShift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+                int direction = isShift ? -1 : 1;
+                int newIndex = index + direction;
+
+                if (newIndex >= 0 && newIndex < ViewModel.Entries.Count)
+                {
+                    FocusEntry(ViewModel.Entries[newIndex]);
                     e.Handled = true;
                 }
             }

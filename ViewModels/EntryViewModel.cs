@@ -45,6 +45,20 @@ namespace yTodo.ViewModels
             UpdateColor();
         }
 
+        private bool _isPlaceholder;
+        public bool IsPlaceholder
+        {
+            get => _isPlaceholder;
+            set
+            {
+                if (_isPlaceholder != value)
+                {
+                    _isPlaceholder = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string Content
         {
             get => _content;
@@ -52,6 +66,12 @@ namespace yTodo.ViewModels
             {
                 if (_content != value)
                 {
+                    if (IsPlaceholder && !string.IsNullOrEmpty(value))
+                    {
+                        IsPlaceholder = false;
+                        Type = "Task";
+                    }
+
                     if (value.StartsWith("## "))
                     {
                         Type = "Header";

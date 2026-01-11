@@ -17,6 +17,7 @@ namespace yTodo.Models
         public double FontSize { get; set; } = 16;
         public double LineSpacing { get; set; } = 12;
         public string BackgroundColor { get; set; } = "#1E1E1E"; // New property
+        public string AppTitle { get; set; } = "yTodo";
 
         // Window Placement
         public double WindowTop { get; set; } = 100;
