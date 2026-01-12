@@ -1,0 +1,71 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main # Assuming 'main' is your primary branch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]' # Prevent infinite loop when bot pushes
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Required for git history and tagging
+        token: ${{ secrets.GITHUB_TOKEN }} # Ensure push permissions
+
+    - name: Get current version and calculate new version
+      id: get_version
+      run: |
+        MANIFEST_FILE="Package.appxmanifest"
+        CURRENT_VERSION=$(grep -oP 'Version="\K[^"].' $MANIFEST_FILE)
+        echo "Current Version: $CURRENT_VERSION"
+
+        # Split version into parts
+        IFS='.' read -r MAJOR MINOR PATCH BUILD <<< "$CURRENT_VERSION"
+
+        # Increment patch version
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH.$BUILD"
+        echo "New Version: $NEW_VERSION"
+
+        echo "OLD_VERSION=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+        echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+        echo "NEW_TAG=v$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Update Package.appxmanifest
+      run: |
+        MANIFEST_FILE="Package.appxmanifest"
+        OLD_VERSION="${{ steps.get_version.outputs.OLD_VERSION }}"
+        NEW_VERSION="${{ steps.get_version.outputs.NEW_VERSION }}"
+        # Use a temporary file for sed output to avoid issues with in-place editing directly on some systems or older sed versions
+        sed "s/Version=\"$OLD_VERSION\"/Version=\"$NEW_VERSION\"/" "$MANIFEST_FILE" > "$MANIFEST_FILE.tmp" && mv "$MANIFEST_FILE.tmp" "$MANIFEST_FILE"
+        echo "Updated $MANIFEST_FILE with version $NEW_VERSION"
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and push changes
+      run: |
+        git add Package.appxmanifest
+        git commit -m "chore: Bump version to ${{ steps.get_version.outputs.NEW_VERSION }}"
+        git push origin main # Push to the main branch
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_version.outputs.NEW_TAG }}
+        name: Release ${{ steps.get_version.outputs.NEW_TAG }}
+        body: |
+          ## What's Changed
+          - Version bumped to ${{ steps.get_version.outputs.NEW_VERSION }}
+          # You can add more detailed release notes here.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
