@@ -1,9 +1,8 @@
 # yTodo
 
-A lightweight, keyboard-centric TODO and note-taking application for Windows, built with .NET 8 and WPF. `yTodo` is designed to stay out of your way while providing a seamless experience for managing tasks, headers, and notes.
+A lightweight, simple, keyboard-centric TODO and note-taking application for Windows, built with .NET 8 and WPF with full RTL support. 
 
 ![Preview](screenshot-checklist.jpg)
-
 
 ## Features
 
@@ -49,10 +48,6 @@ Access the settings menu to personalize your experience:
 ### Prerequisites
 - Windows 10/11
 - [.NET 8.0 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
-
-### Installation
-1. Download the latest release.
-2. Run `yTodo.exe`.
 
 ## Development
 
