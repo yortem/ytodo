@@ -2,7 +2,8 @@
 
 A lightweight, keyboard-centric TODO and note-taking application for Windows, built with .NET 8 and WPF. `yTodo` is designed to stay out of your way while providing a seamless experience for managing tasks, headers, and notes.
 
-![yTodo Icon](task.ico)
+![Preview](screenshot-checklist.jpg)
+
 
 ## Features
 
@@ -29,6 +30,8 @@ Access the settings menu to personalize your experience:
 - **Themes**: Set a custom background color using Hex codes.
 - **Typography**: Choose from a variety of fonts (including RTL-optimized ones like Assistant and Heebo) and adjust font size and line spacing.
 - **RTL Support**: Full support for Right-to-Left languages like Hebrew and Arabic.
+
+![Settings Preview](screenshot-checklist2.jpg)
 
 ### 💾 Data & Export
 - **Auto-Save**: Your data is automatically saved as you type.
