@@ -65,5 +65,23 @@ namespace yTodo
                 System.Windows.MessageBox.Show("Export Successful!");
             }
         }
+
+        private void OnDefaultHeaderColorClicked(object sender, RoutedEventArgs e) => PickDefaultColor(hex => ViewModel.DefaultHeaderColor = hex, ViewModel.DefaultHeaderColor);
+
+        private void PickDefaultColor(Action<string> setter, string currentHex)
+        {
+            var colorDialog = new System.Windows.Forms.ColorDialog();
+            try
+            {
+                colorDialog.Color = System.Drawing.ColorTranslator.FromHtml(currentHex);
+            }
+            catch { }
+
+            if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                var c = colorDialog.Color;
+                setter($"#{c.R:X2}{c.G:X2}{c.B:X2}");
+            }
+        }
     }
 }

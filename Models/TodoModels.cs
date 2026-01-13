@@ -25,6 +25,13 @@ namespace yTodo.Models
         public double WindowWidth { get; set; } = 450;
         public double WindowHeight { get; set; } = 800;
         public int WindowState { get; set; } = 0; // 0: Normal, 1: Minimized, 2: Maximized
+        public bool MinimizeToTray { get; set; } = false;
+
+        // Default colors for entry types
+        public string DefaultHeaderColor { get; set; } = "#FFCCCCCC"; // Light Gray
+        public string DefaultTaskColor { get; set; } = "#FF88AAFF";   // Light Blue
+        public string DefaultNoteColor { get; set; } = "#FFFFFFFF";   // White
+        public string DefaultPlaceholderColor { get; set; } = "#FF888888"; // Gray
     }
 
     public class TodoEntry

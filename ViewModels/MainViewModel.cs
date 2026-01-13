@@ -146,6 +146,34 @@ namespace yTodo.ViewModels
             }
         }
 
+        public bool MinimizeToTray
+        {
+            get => Settings?.MinimizeToTray ?? false;
+            set
+            {
+                if (Settings != null && Settings.MinimizeToTray != value)
+                {
+                    Settings.MinimizeToTray = value;
+                    OnPropertyChanged(nameof(MinimizeToTray));
+                    TriggerSave();
+                }
+            }
+        }
+
+        public string DefaultHeaderColor
+        {
+            get => Settings?.DefaultHeaderColor ?? "#FFCCCCCC";
+            set
+            {
+                if (Settings != null && Settings.DefaultHeaderColor != value)
+                {
+                    Settings.DefaultHeaderColor = value;
+                    OnPropertyChanged(nameof(DefaultHeaderColor));
+                    TriggerSave();
+                }
+            }
+        }
+
         public System.Windows.FlowDirection FlowDirection => IsRtl ? System.Windows.FlowDirection.RightToLeft : System.Windows.FlowDirection.LeftToRight;
 
         private string _statusMessage = "";
@@ -169,7 +197,8 @@ namespace yTodo.ViewModels
                 if (e.PropertyName == nameof(EntryViewModel.Content) ||
                     e.PropertyName == nameof(EntryViewModel.IsDone) ||
                     e.PropertyName == nameof(EntryViewModel.Type) || 
-                    e.PropertyName == nameof(EntryViewModel.IsPlaceholder)) // trigger save on placeholder change (removal)
+                    e.PropertyName == nameof(EntryViewModel.IsPlaceholder) ||
+                    e.PropertyName == nameof(EntryViewModel.Color)) 
                 {
                     TriggerSave();
                 }
@@ -181,7 +210,7 @@ namespace yTodo.ViewModels
             try
             {
                 _appData = await _storageService.LoadAsync();
-                Entries.Clear(); // Ensure clear before add
+                Entries.Clear(); 
                 foreach (var entry in _appData.Entries)
                 {
                     var vm = new EntryViewModel(entry, _urlService)
@@ -189,43 +218,42 @@ namespace yTodo.ViewModels
                         FontFamily = SelectedFont,
                         FontSize = SelectedFontSize
                     };
+
+                    if (vm.IsHeader && string.IsNullOrEmpty(vm.Color))
+                    {
+                        vm.Color = DefaultHeaderColor;
+                    }
+
                     Entries.Add(vm);
                 }
 
                 EnsurePlaceholders();
 
-                if (Entries.Count == 0) // Should be handled by EnsurePlaceholders, but safe keep
-                {
-                   // AddEntry(-1, ""); 
-                }
-
                 OnPropertyChanged(nameof(Settings));
-                // ... rest of properties
                 OnPropertyChanged(nameof(IsRtl));
                 OnPropertyChanged(nameof(FlowDirection));
                 OnPropertyChanged(nameof(SelectedFont));
                 OnPropertyChanged(nameof(SelectedFontSize));
-                OnPropertyChanged(nameof(SelectedLineSpacing));
                 OnPropertyChanged(nameof(SelectedBackgroundColor));
+                OnPropertyChanged(nameof(MinimizeToTray));
+                OnPropertyChanged(nameof(DefaultHeaderColor));
             }
             catch { }
         }
 
         private void EnsurePlaceholders()
         {
-            // 1. Check end of list
             if (Entries.Count == 0 || !Entries.Last().IsPlaceholder)
             {
                 Entries.Add(CreatePlaceholder());
             }
 
-            // 2. Check before each header
             for (int i = 1; i < Entries.Count; i++)
             {
                 if (Entries[i].IsHeader && !Entries[i-1].IsPlaceholder)
                 {
                     Entries.Insert(i, CreatePlaceholder());
-                    i++; // Skip the header we just pushed
+                    i++;
                 }
             }
         }
@@ -236,7 +264,7 @@ namespace yTodo.ViewModels
             {
                 IsPlaceholder = true,
                 Content = "",
-                Type = "Task", // Start as task so it has bullet? Or Note? User said "Add new task".
+                Type = "Task",
                 FontFamily = SelectedFont,
                 FontSize = SelectedFontSize
             };
@@ -262,7 +290,6 @@ namespace yTodo.ViewModels
 
                 StatusMessage = "Saved";
                 
-                // Clear the message after 3 seconds, but only if a newer save hasn't started
                 _ = Task.Run(async () => {
                     await Task.Delay(3000);
                     if (_saveCounter == currentSave)
@@ -298,17 +325,18 @@ namespace yTodo.ViewModels
                 FontFamily = SelectedFont,
                 FontSize = SelectedFontSize
             };
-            if (index == -1 || index >= Entries.Count) Entries.Add(newEntry);
-            else Entries.Insert(index + 1, newEntry);
             
-            EnsurePlaceholders(); // Check if we broke stricture
+            if (index == -1 || index >= Entries.Count) Entries.Add(newEntry);
+            else Entries.Insert(index, newEntry);
+            
+            EnsurePlaceholders();
             return newEntry;
         }
 
         public void RemoveEntry(EntryViewModel entry) 
         {
             Entries.Remove(entry);
-            EnsurePlaceholders(); // Restore placeholder if last item removed
+            EnsurePlaceholders();
         }
 
         public async Task ExportToTxtAsync(string filePath)
@@ -331,13 +359,11 @@ namespace yTodo.ViewModels
             if (_appData == null) return;
             try
             {
-                // Create a temporary AppData object to avoid modifying the original during export
                 var exportData = new AppData 
                 { 
-                    Entries = _appData.Entries.Where(e => true).ToList(), // Filtered below 
+                    Entries = Entries.Where(e => !e.IsPlaceholder).Select(e => e.ToModel()).ToList(), 
                     Settings = _appData.Settings 
                 };
-                exportData.Entries = Entries.Where(e => !e.IsPlaceholder).Select(e => e.ToModel()).ToList();
                 
                 var json = System.Text.Json.JsonSerializer.Serialize(exportData, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
                 await System.IO.File.WriteAllTextAsync(filePath, json);

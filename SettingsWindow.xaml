@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:yTodo.Helpers"
-        Title="yTodo Settings" Height="500" Width="350"
+        Title="yTodo Settings" Height="600" Width="350"
         Background="#2D2D2D" Foreground="White"
         WindowStartupLocation="CenterOwner"
         WindowStyle="ToolWindow"
@@ -10,6 +10,7 @@
     
     <Window.Resources>
         <helpers:ColorConverter x:Key="ColorConverter" />
+        
         <Style x:Key="FlatButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -30,6 +31,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
         <Style x:Key="ColorSwatch" TargetType="Button">
             <Setter Property="Width" Value="32"/>
             <Setter Property="Height" Value="32"/>
@@ -51,6 +53,48 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Modern Thin Slider Style -->
+        <Style x:Key="ModernSlider" TargetType="Slider">
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border x:Name="TrackBackground" 
+                                    Background="{Binding SelectedBackgroundColor, Converter={StaticResource ColorConverter}, ConverterParameter=Darken0.6}" 
+                                    Height="4" CornerRadius="2" VerticalAlignment="Center" Margin="5,0"/>
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="Slider.DecreaseLarge" Background="Transparent" BorderThickness="0"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="Slider.IncreaseLarge" Background="Transparent" BorderThickness="0"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Width="14" Height="14" 
+                                                         Fill="{Binding SelectedBackgroundColor, Converter={StaticResource ColorConverter}, ConverterParameter=Darken1.2}"
+                                                         Stroke="#44FFFFFF" StrokeThickness="1" />
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="TrackBackground" Property="Background" Value="{Binding SelectedBackgroundColor, Converter={StaticResource ColorConverter}, ConverterParameter=Darken0.7}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -64,15 +108,24 @@
                              Background="#1AFFFFFF" Foreground="White" BorderThickness="1" BorderBrush="#33FFFFFF" Padding="5" Margin="0,0,0,15"/>
                     
                     <CheckBox Content="RTL Mode" IsChecked="{Binding IsRtl}" Foreground="White" Margin="0,0,0,15"/>
+                    <CheckBox Content="Minimize to Tray" IsChecked="{Binding MinimizeToTray}" Foreground="White" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Default Header Color" FontWeight="Bold" FontSize="12" Margin="0,10,0,5"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <Button Style="{StaticResource ColorSwatch}" 
+                                Background="{Binding DefaultHeaderColor, Converter={StaticResource ColorConverter}}" 
+                                Click="OnDefaultHeaderColorClicked" Margin="0,0,10,0"/>
+                        <TextBlock Text="Click to change default color for new headers" VerticalAlignment="Center" FontSize="10" Opacity="0.6"/>
+                    </StackPanel>
                     
                     <TextBlock Text="Font Family" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
                     <ComboBox ItemsSource="{Binding AvailableFonts}" SelectedItem="{Binding SelectedFont}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Font Size" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
-                    <Slider Minimum="12" Maximum="32" Value="{Binding SelectedFontSize}" Margin="0,0,0,15"/>
+                    <Slider Minimum="12" Maximum="32" Value="{Binding SelectedFontSize}" Style="{StaticResource ModernSlider}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Line Spacing" FontSize="11" Opacity="0.7" Margin="0,0,0,5"/>
-                    <Slider Minimum="0" Maximum="40" Value="{Binding SelectedLineSpacing}" Margin="0,0,0,15"/>
+                    <Slider Minimum="0" Maximum="40" Value="{Binding SelectedLineSpacing}" Style="{StaticResource ModernSlider}" Margin="0,0,0,15"/>
 
                     <TextBlock Text="Theme Color" FontSize="11" Opacity="0.7" Margin="0,0,0,8"/>
                     <WrapPanel Orientation="Horizontal" Margin="0,0,0,5">

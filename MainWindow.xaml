@@ -15,7 +15,101 @@
         PreviewMouseDown="Window_PreviewMouseDown">
     
     <Window.Resources>
-        <!-- Converters moved to App.xaml -->
+        <!-- Global Modern Ultra-Thin ScrollBar Style (No x:Key to apply to all) -->
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="MinWidth" Value="6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="true">
+                            <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}">
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                <!-- Semi-transparent white thumb for best visibility on dark themes -->
+                                                <Border Background="#44FFFFFF" 
+                                                        CornerRadius="3" Margin="1,0" x:Name="ThumbBorder"/>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="true">
+                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="#88FFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Width" Value="Auto"/>
+                    <Setter Property="Height" Value="6"/>
+                    <Setter Property="MinHeight" Value="6"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="true">
+                                    <Track x:Name="PART_Track" IsDirectionReversed="false" IsEnabled="{TemplateBinding IsEnabled}">
+                                        <Track.Thumb>
+                                            <Thumb x:Name="Thumb">
+                                                <Thumb.Template>
+                                                    <ControlTemplate TargetType="{x:Type Thumb}">
+                                                        <Border Background="#44FFFFFF" 
+                                                                CornerRadius="3" Margin="0,1" x:Name="ThumbBorder"/>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="true">
+                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="#88FFFFFF"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Thumb.Template>
+                                            </Thumb>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Global ScrollViewer Style to ensure it uses our ScrollBar -->
+        <Style TargetType="{x:Type ScrollViewer}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ScrollContentPresenter Grid.Column="0" Grid.Row="0" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" CanContentScroll="{TemplateBinding CanContentScroll}"/>
+                            <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Grid.Row="0" 
+                                       Value="{TemplateBinding VerticalOffset}" 
+                                       Maximum="{TemplateBinding ScrollableHeight}" 
+                                       ViewportSize="{TemplateBinding ViewportHeight}" 
+                                       Visibility="{TemplateBinding VerticalScrollBarVisibility}"/>
+                            <ScrollBar x:Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Column="0" Grid.Row="1" 
+                                       Value="{TemplateBinding HorizontalOffset}" 
+                                       Maximum="{TemplateBinding ScrollableWidth}" 
+                                       ViewportSize="{TemplateBinding ViewportWidth}" 
+                                       Visibility="{TemplateBinding HorizontalScrollBarVisibility}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <DataTemplate x:Key="EntryTemplate" DataType="{x:Type vm:EntryViewModel}">
             <Border Background="Transparent" x:Name="ItemBorder" CornerRadius="0">
@@ -27,12 +121,23 @@
                 </Border.Padding>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="Auto" /> <!-- The Indicator Column -->
+                        <ColumnDefinition Width="Auto" /> <!-- Checkbox Column -->
+                        <ColumnDefinition Width="*" />    <!-- Content Column -->
+                        <ColumnDefinition Width="40" />   <!-- Actions Column -->
                     </Grid.ColumnDefinitions>
 
-                    <CheckBox Grid.Column="0" IsChecked="{Binding IsDone}" VerticalAlignment="Top" Margin="0,4,15,0">
+                    <Button Grid.Column="0" Width="6" Margin="0,2,15,2" x:Name="HeaderIndicator"
+                            Style="{StaticResource FlatButton}" Click="OnColorClicked"
+                            Visibility="Collapsed">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{Binding Color, Converter={StaticResource ColorConverter}}" CornerRadius="3" Cursor="Hand" />
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <CheckBox Grid.Column="1" IsChecked="{Binding IsDone}" VerticalAlignment="Top" Margin="0,4,15,0" x:Name="ItemCheckBox">
                         <CheckBox.Visibility>
                             <Binding Path="IsTask">
                                 <Binding.Converter>
@@ -42,10 +147,9 @@
                         </CheckBox.Visibility>
                     </CheckBox>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                    <StackPanel Grid.Column="2" VerticalAlignment="Top">
                         <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}"
                                  Background="Transparent"
-                                 Foreground="{Binding Color, Converter={StaticResource ColorConverter}}"
                                  BorderThickness="0"
                                  CaretBrush="White"
                                  FontSize="{Binding DisplayFontSize}"
@@ -58,7 +162,21 @@
                                  PreviewMouseLeftButtonDown="TextBox_PreviewMouseLeftButtonDown"
                                  DataObject.Pasting="OnTextBoxPasting"
                                  GotFocus="TextBox_GotFocus"
-                                 LostFocus="TextBox_LostFocus">
+                                 LostFocus="TextBox_LostFocus"
+                                 x:Name="ContentTextBox">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDone}" Value="True">
+                                            <Setter Property="Foreground" Value="#4CAF50" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsHeader}" Value="True">
+                                            <Setter Property="Foreground" Value="{Binding Color, Converter={StaticResource ColorConverter}}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
                             <TextBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Command="Cut" Header="Cut"/>
@@ -85,7 +203,7 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="✕" Click="OnDeleteClicked" 
                                 Background="Transparent" Foreground="#22FFFFFF" BorderThickness="0"
                                 Width="24" Height="24" Cursor="Hand"
@@ -94,6 +212,16 @@
                 </Grid>
             </Border>
             <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsHeader}" Value="True">
+                    <Setter TargetName="HeaderIndicator" Property="Visibility" Value="Visible" />
+                    
+                    <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
+                    <Setter TargetName="ItemBorder" Property="Margin" Value="0,15,0,5" />
+                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#11FFFFFF" />
+                    <Setter TargetName="ItemBorder" Property="Padding" Value="20,5,20,10" />
+                </DataTrigger>
+                
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter TargetName="ItemBorder" Property="Background" Value="#08FFFFFF" />
                 </Trigger>
@@ -102,23 +230,11 @@
                     <Setter TargetName="DeleteBtn" Property="Foreground" Value="#88FFFFFF" />
                 </DataTrigger>
                 
-                <!-- Placeholder Styling -->
                 <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
                     <Setter TargetName="ItemBorder" Property="Opacity" Value="0.5" />
                     <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
-                
-                <!-- Header Specific Styling -->
-                <DataTrigger Binding="{Binding IsHeader}" Value="True">
-                    <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
-                    
-                    <Setter TargetName="ItemBorder" Property="Margin" Value="0,15,0,5" />
-                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0,0,0,1" />
-                    <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#11FFFFFF" />
-                    <Setter TargetName="ItemBorder" Property="Padding" Value="20,5,20,10" />
-                </DataTrigger>
 
-                <!-- Highlight when focused -->
                 <DataTrigger Binding="{Binding IsFocused, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                     <Setter TargetName="ItemBorder" Property="Background" Value="#0AFFFFFF" />
                 </DataTrigger>
@@ -153,7 +269,7 @@
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Focusable" Value="True"/> <!-- Enabled focus for highlight -->
+                    <Setter Property="Focusable" Value="True"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">

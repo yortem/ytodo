@@ -30,6 +30,7 @@ namespace yTodo
         public MainViewModel ViewModel { get; } = new MainViewModel();
         private System.Windows.Forms.NotifyIcon? _notifyIcon;
         private SettingsWindow? _settingsWindow;
+        private bool _isManuallyClosing = false;
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -123,7 +124,11 @@ namespace yTodo
 
             var contextMenu = new System.Windows.Forms.ContextMenuStrip();
             contextMenu.Items.Add("Open", null, (s, e) => ShowWindow());
-            contextMenu.Items.Add("Exit", null, (s, e) => Application.Current.Shutdown());
+            contextMenu.Items.Add("Exit", null, (s, e) =>
+            {
+                _isManuallyClosing = true;
+                Application.Current.Shutdown();
+            });
             _notifyIcon.ContextMenuStrip = contextMenu;
         }
 
@@ -188,6 +193,12 @@ namespace yTodo
                 {
                     FocusEntry(ViewModel.Entries[index - 1]);
                     e.Handled = true;
+                }
+                else if (index == 0)
+                {
+                    var newEntry = ViewModel.AddEntry(0, "");
+                    e.Handled = true;
+                    FocusEntry(newEntry);
                 }
             }
             else if (e.Key == Key.Down)
@@ -338,6 +349,28 @@ namespace yTodo
             }
         }
 
+        private void OnColorClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is EntryViewModel entry && entry.IsHeader)
+            {
+                var colorDialog = new System.Windows.Forms.ColorDialog();
+                try
+                {
+                    if (!string.IsNullOrEmpty(entry.Color))
+                    {
+                        colorDialog.Color = System.Drawing.ColorTranslator.FromHtml(entry.Color);
+                    }
+                }
+                catch { }
+
+                if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    var c = colorDialog.Color;
+                    entry.Color = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+                }
+            }
+        }
+
         private void OnSettingsClicked(object sender, RoutedEventArgs e)
         {
             if (_settingsWindow == null || !_settingsWindow.IsLoaded)
@@ -392,6 +425,16 @@ namespace yTodo
                 MessageBox.Show($"Error opening link: {ex.Message}", "yTodo Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             e.Handled = true;
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (ViewModel.MinimizeToTray && !_isManuallyClosing)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
+            base.OnClosing(e);
         }
 
         protected override void OnClosed(EventArgs e)

@@ -42,7 +42,6 @@ namespace yTodo.ViewModels
                 _url = entry.Metadata.Url;
                 _displayTitle = entry.Metadata.Title;
             }
-            UpdateColor();
         }
 
         private bool _isPlaceholder;
@@ -85,7 +84,6 @@ namespace yTodo.ViewModels
 
                     _content = value;
                     OnPropertyChanged();
-                    UpdateColor();
                     CheckForUrl();
                 }
             }
@@ -104,7 +102,6 @@ namespace yTodo.ViewModels
                     OnPropertyChanged(nameof(IsTask));
                     OnPropertyChanged(nameof(IsNote));
                     OnPropertyChanged(nameof(DisplayFontSize));
-                    UpdateColor();
                 }
             }
         }
@@ -118,7 +115,6 @@ namespace yTodo.ViewModels
                 {
                     _isDone = value;
                     OnPropertyChanged();
-                    UpdateColor();
                 }
             }
         }
@@ -167,24 +163,6 @@ namespace yTodo.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        private void UpdateColor()
-        {
-            if (IsDone && IsTask)
-            {
-                Color = "#4CAF50"; // Green for completed tasks
-                return;
-            }
-
-            if (IsHeader)
-            {
-                Color = "#FFFFFF"; // Pure white for headers
-                return;
-            }
-
-            // White with 20% transparency (80% opacity)
-            Color = "#CCFFFFFF";
-        }
 
         private async void CheckForUrl()
         {

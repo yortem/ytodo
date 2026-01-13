@@ -4,6 +4,9 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
+// Alias to avoid ambiguity with System.Drawing.Color
+using MediaColor = System.Windows.Media.Color;
+
 namespace yTodo.Helpers
 {
     public class HeaderWeightConverter : IValueConverter
@@ -26,14 +29,50 @@ namespace yTodo.Helpers
             {
                 try
                 {
-                    return (SolidColorBrush)new BrushConverter().ConvertFromString(colorStr)!;
+                    var color = (MediaColor)System.Windows.Media.ColorConverter.ConvertFromString(colorStr);
+                    
+                    // Check for parameter
+                    if (parameter is string param)
+                    {
+                        if (param.StartsWith("Darken"))
+                        {
+                            double factor = 0.8;
+                            if (double.TryParse(param.Substring(6), out double customFactor)) factor = customFactor;
+
+                            color = MediaColor.FromRgb(
+                                (byte)(color.R * factor),
+                                (byte)(color.G * factor),
+                                (byte)(color.B * factor));
+                        }
+                        else if (param.StartsWith("Lighten"))
+                        {
+                            double factor = 1.2;
+                            if (double.TryParse(param.Substring(7), out double customFactor)) factor = customFactor;
+
+                            color = MediaColor.FromRgb(
+                                (byte)Math.Min(255, color.R * factor),
+                                (byte)Math.Min(255, color.G * factor),
+                                (byte)Math.Min(255, color.B * factor));
+                        }
+                    }
+
+                    return new SolidColorBrush(color);
                 }
                 catch { }
+            }
+            else if (value is MediaColor c)
+            {
+                return new SolidColorBrush(c);
             }
             return System.Windows.Media.Brushes.White;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+        
+        public static MediaColor ColorFromHex(string hex)
+        {
+            return (MediaColor)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+        }
     }
 
     public class ThicknessConverter : IMultiValueConverter
